@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Be My Valentine?</title>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        background: #9db5dc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+    }
+
+    .card {
+        background: #e4e5d0;
+        width: 90%;
+        max-width: 400px;
+        min-height: 450px;
+        border-radius: 30px;
+        text-align: center;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .cat {
+        width: 150px;
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        font-size: clamp(1.2rem, 5vw, 1.5rem);
+        margin-bottom: 30px;
+        padding: 0 10px;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 12px 30px;
+        border-radius: 40px;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
+
+    .yes {
+        background: linear-gradient(45deg, #ff2a8b, #ff5ca8);
+        color: white;
+        box-shadow: 0 8px 20px rgba(255, 42, 139, 0.4);
+    }
+
+    .no {
+        background: #dcdcdc;
+        color: #555;
+    }
+
+    /* Message area for when she tries to hit No */
+    #funnyMessage {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #555;
+        font-style: italic;
+        min-height: 20px;
+    }
+
+    .dot {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        z-index: 1000;
+        animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+        to { transform: translateY(110vh); opacity: 0; }
+    }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <img src="images/giphy1.gif" class="cat" alt="cat">
+    <h1 id="mainHeading">Will you be my valentine? My little Cup cake</h1>
+
+    <div class="buttons" id="btnGroup">
+        <button id="yesBtn" class="yes">Yes</button>
+        <button id="noBtn" class="no">No</button>
+    </div>
+    
+    <div id="funnyMessage"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+(function(){ emailjs.init("MD1lZRTfiVlyDXV7v"); })();
+
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const funnyMessage = document.getElementById("funnyMessage");
+
+let noAttemptCount = 0;
+
+const funnyTexts = [
+    "Wait, did you misclick?",
+    "The 'Yes' button is right there...",
+    "Are we playing tag? 🏃‍♂️",
+    "You're quite persistent!",
+    "Okay, now you're just showing off your reflexes.",
+    "I can do this all day! 😈"
+];
+
+function handleNoAttempt() {
+    noAttemptCount++;
+    moveButton();
+
+    // Update funny message every few attempts
+    if (noAttemptCount % 2 === 0) {
+        let index = Math.min(Math.floor(noAttemptCount / 2) - 1, funnyTexts.length - 1);
+        funnyMessage.innerText = funnyTexts[index];
+    }
+
+    // Email you every 10 attempts
+    if (noAttemptCount % 10 === 0) {
+        sendNoUpdate(noAttemptCount);
+    }
+}
+
+function sendNoUpdate(count) {
+    emailjs.send("service_bgtx998", "template_8q9hutf", {
+        message: `She tried to click "No" ${count} times now! 😂`,
+        time: new Date().toLocaleString()
+    });
+}
+
+noBtn.addEventListener("mouseover", handleNoAttempt);
+noBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    handleNoAttempt();
+});
+
+function moveButton() {
+    const padding = 20;
+    const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+    const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+    const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+    const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+    noBtn.style.position = "fixed";
+    noBtn.style.left = randomX + "px";
+    noBtn.style.top = randomY + "px";
+}
+
+yesBtn.addEventListener("click", () => {
+    const timeNow = new Date().toLocaleString();
+    
+    emailjs.send("service_bgtx998", "template_ygo5t9z", {
+        message: `Ammu said YES! 💖 (After trying to say No ${noAttemptCount} times)`,
+        time: timeNow
+    });
+
+    document.querySelector(".cat").src = "images/giphy2.gif"; // Added .gif extension
+    document.getElementById("mainHeading").innerHTML = "Yay! 💖";
+    document.getElementById("mainHeading").style.color = "#ff2a8b";
+    
+    // Fixed: Update the funnyMessage div instead of a non-existent .hint class
+    funnyMessage.innerText = "I know you would pick yes. I love you so so such Ponneeee ❤️❤️";
+    funnyMessage.style.fontSize = "18px";
+    funnyMessage.style.color = "#ff2a8b";
+    funnyMessage.style.fontStyle = "normal";
+    
+    document.getElementById("btnGroup").style.display = "none";
+
+    startConfetti();
+});
+
+function startConfetti() {
+    let interval = setInterval(() => {
+        for (let i = 0; i < 8; i++) {
+            let dot = document.createElement("div");
+            dot.className = "dot";
+            dot.style.background = ["gold", "pink", "#ff2a8b"][Math.floor(Math.random()*3)];
+            dot.style.left = Math.random() * window.innerWidth + "px";
+            dot.style.top = "-10px";
+            dot.style.animationDuration = (Math.random() * 2 + 2) + "s";
+            document.body.appendChild(dot);
+            setTimeout(() => dot.remove(), 4000);
+        }
+    }, 200);
+    setTimeout(() => clearInterval(interval), 2500);
+}
+</script>
+</body>
+</html>
